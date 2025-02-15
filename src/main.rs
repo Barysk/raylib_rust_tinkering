@@ -1,10 +1,8 @@
-use std::ops::Range;
-
-use raylib::{ffi::MeasureText, prelude::*};
+use raylib::prelude::*;
 
 const SCREEN_WIDTH: f32 = 640f32;
 const SCREEN_HEIGHT: f32 = 480f32;
-const VERSION_NAME: &str = "Random values";
+const VERSION_NAME: &str = "Ball Collisions";
 
 struct Ball {
     direction: Vector2,
@@ -52,6 +50,13 @@ fn main() {
         let delta_time = rl.get_frame_time();
 
         /* --- UPDATE --- */
+
+        // Checking collisios
+        {
+            if check_collision_circles(ball.position, ball.radius, bouncing_ball.position, bouncing_ball.radius){
+                bouncing_ball.velocity *= -1f32;
+            }
+        }
 
         // Bouncing Ball
         {
@@ -124,14 +129,14 @@ fn main() {
                 "every 60 frames new value genrated",
                 SCREEN_HEIGHT as i32 / 2i32 - 40i32,
                 24i32,
-                Color::WHITE,
+                Color::DARKGRAY,
             );
             draw_text_center(
                 &mut d,
                 &value.to_string(),
                 SCREEN_HEIGHT as i32 / 2i32 - 20i32,
                 24i32,
-                Color::WHITE,
+                Color::DARKGRAY,
             );
         }
 
