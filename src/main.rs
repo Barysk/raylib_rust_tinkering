@@ -14,6 +14,13 @@ struct Ball {
     color: Color,
 }
 
+struct BouncingBall {
+    position: Vector2,
+    velocity: Vector2,
+    radius: f32,
+    color: Color,
+}
+
 fn main() {
     let (mut rl, thread) = raylib::init()
         .size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32)
@@ -33,11 +40,32 @@ fn main() {
         radius: 5f32,
         color: Color::RED,
     };
+    
+    let mut bouncing_ball = BouncingBall {
+        position: Vector2::new(SCREEN_WIDTH / 2f32, SCREEN_HEIGHT / 2f32),
+        velocity: Vector2::new(200f32, 200f32),
+        radius: 5f32,
+        color: Color::BLUE
+    };
 
     while !rl.window_should_close() {
         let delta_time = rl.get_frame_time();
 
         /* --- UPDATE --- */
+
+        // Bouncing Ball
+        {
+            bouncing_ball.position += bouncing_ball.velocity * delta_time;
+            
+            if bouncing_ball.position.x >= SCREEN_WIDTH - bouncing_ball.radius
+            || bouncing_ball.position.x <= bouncing_ball.radius {
+                bouncing_ball.velocity.x *= -1f32;
+            }
+            if bouncing_ball.position.y >= SCREEN_HEIGHT - bouncing_ball.radius
+            || bouncing_ball.position.y <= bouncing_ball.radius {
+                bouncing_ball.velocity.y *= -1f32;
+            }
+        }
 
         // Example of text appearing
         {
@@ -82,6 +110,12 @@ fn main() {
 
         /* --- DRAW --- */
         let mut d = rl.begin_drawing(&thread);
+
+        // draw bouncing ball
+        {
+            d.draw_circle_v(bouncing_ball.position, bouncing_ball.radius, bouncing_ball.color);
+            d.draw_circle_v(bouncing_ball.position, bouncing_ball.radius - 2f32, Color::WHITE);
+        }
 
         // centered text drawing
         {
