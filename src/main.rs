@@ -55,6 +55,8 @@ fn main() {
 
     rl.set_target_fps(60u32);
 
+    // Loading shader
+    let shader: Shader = rl.load_shader(&thread, Some("shaders/lighting.vs"), Some("shaders/fog.fs")).expect("Failed_to_load");
 
     let cam_background_3d = Camera3D::perspective(
         Vector3::new(0f32, 10f32, 10f32),
