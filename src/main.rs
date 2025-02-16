@@ -2,7 +2,7 @@ use raylib::prelude::*;
 
 const SCREEN_WIDTH: f32 = 640f32;
 const SCREEN_HEIGHT: f32 = 480f32;
-const VERSION_NAME: &str = "Ball Collisions";
+const VERSION_NAME: &str = "3D scene introduced";
 
 struct Ball {
     direction: Vector2,
@@ -49,14 +49,23 @@ fn main() {
     let (mut rl, thread) = raylib::init()
         .size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32)
         .title(VERSION_NAME)
+        .resizable()
         .vsync()
         .build();
 
     rl.set_target_fps(60u32);
 
+
+    let cam_background_3d = Camera3D::perspective(
+        Vector3::new(0f32, 10f32, 10f32),
+        Vector3::new(0f32, 0f32, 0f32),
+        Vector3::new(0f32, 1f32, 0f32),
+        45f32,
+    );
+
     let mut value: i32 = rl.get_random_value(-100i32..100i32); // not right documentation
     let mut frame_count = 0;
-    let mut is_colliding: bool = false;
+    let mut is_colliding: bool;
 
     let mut ball = Ball::new(&mut rl, &thread, "assets/tree_left.png");
 
@@ -72,6 +81,10 @@ fn main() {
 
     while !rl.window_should_close() {
         let delta_time = rl.get_frame_time();
+        
+        if rl.is_key_pressed(KeyboardKey::KEY_F11){
+            rl.toggle_fullscreen();
+        }
 
         /* --- UPDATE --- */
 
@@ -151,10 +164,21 @@ fn main() {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::BLACK);
 
+        // ENTER 3D MODE
+        {
+            let mut d3d = d.begin_mode3D(&cam_background_3d);
+            d3d.draw_cube_v(
+                Vector3::new(0f32, 0f32, 0f32),
+                Vector3::new(5f32, 5f32, 5f32),
+                Color::ORANGE,
+            );
+            d3d.draw_cube_wires(Vector3::new(0f32, 0f32, 0f32), 5f32, 6f32, 7f32, Color::RED);
+            d3d.draw_grid(128i32, 16f32);
+        }
         // draw texture
         d.draw_texture_rec(
             &texture_ground,
-            Rectangle::new(0f32, 0f32, SCREEN_WIDTH, SCREEN_HEIGHT),
+            Rectangle::new(0f32, 0f32, SCREEN_WIDTH / 4f32, SCREEN_HEIGHT / 4f32),
             Vector2::new(0f32, 0f32),
             Color::WHITE,
         );
@@ -200,6 +224,7 @@ fn main() {
         }
 
         d.draw_text(VERSION_NAME, 12i32, 12i32, 24i32, Color::RAYWHITE);
+        // d.draw_fps(12i32, 32i32);
         d.draw_text(
             &d.get_fps().to_string(),
             12i32,

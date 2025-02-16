@@ -1,7 +1,10 @@
 [package]
-name = "SSFv3s_raylib_rust"
+name = "RaylibRustTinkering"
 version = "0.1.0"
 edition = "2021"
+
+[profile.release]
+opt-level = 3
 
 [dependencies]
 raylib = "5.0.2"
