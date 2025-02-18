@@ -1,10 +1,5 @@
 use raylib::prelude::*;
 
-#[cfg(not(target_arch = "wasm32"))]
-pub const GLSL_VERSION: i32 = 330;
-#[cfg(target_arch = "wasm32")]
-pub const GLSL_VERSION: i32 = 100;
-
 const MAX_LIGHTS: u32 = 4;
 
 #[repr(i32)]

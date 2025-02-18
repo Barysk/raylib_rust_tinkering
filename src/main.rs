@@ -41,6 +41,10 @@ fn main() {
         .unwrap()
     };
     
+    // Future tweaks
+    //let mut audio = RaylibAudio::init_audio_device();
+    //let sound: Sound = RaylibAudio::new_music_from_memory(&'aud self, filetype, bytes);
+
     let img = Image::load_image_from_mem(".png", TEXTURE_TEXEL_CHECKER).unwrap();
     let texture = rl
         .load_texture_from_image(&thread, &img)
@@ -57,15 +61,26 @@ fn main() {
     model_c.materials_mut()[0].maps_mut()
         [raylib::consts::MaterialMapIndex::MATERIAL_MAP_ALBEDO as usize]
         .texture = *texture.as_ref();
+    
+    // Prepearing right shaders
+    let vertex_shader: &str;
+    let fractal_shader: &str;
+
+    if GLSL_VERSION == 330 {
+        vertex_shader = VERTEX_SHADER_GLSL330;
+        fractal_shader = FRACTAL_SHADER_GLSL330;
+    } else {
+        vertex_shader = VERTEX_SHADER_GLSL330;
+        fractal_shader = FRACTAL_SHADER_GLSL330;
+    }
 
     // Load shader and set up some uniforms
     let mut shader = rl
-        .load_shader(
+        .load_shader_from_memory(
             &thread,
-            Some(&format!("shaders/glsl{}/base_lighting.vs", GLSL_VERSION)),
-            Some(&format!("shaders/glsl{}/fog.fs", GLSL_VERSION)),
-        )
-        .unwrap();
+            Some(vertex_shader),
+            Some(fractal_shader),
+        );
     shader.locs_mut()[raylib::consts::ShaderLocationIndex::SHADER_LOC_MATRIX_MODEL as usize] =
         shader.get_shader_location("matModel");
     shader.locs_mut()[raylib::consts::ShaderLocationIndex::SHADER_LOC_VECTOR_VIEW as usize] =
