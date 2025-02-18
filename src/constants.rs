@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-
 /* Constants */
 pub const SCREEN_WIDTH: f32 = 640f32 / 2f32;
 pub const SCREEN_HEIGHT: f32 = 480f32 / 2f32;
@@ -13,10 +10,6 @@ pub const TEXTURE_TREE_LEFT: &[u8; 16708] = include_bytes!("../assets/tree_left.
 pub const TEXTURE_TREE_RIGHT: &[u8; 15178] = include_bytes!("../assets/tree_right.png");
 
 /* Shaders */
-// Choose manually when final build, since it is target dependant
-// Meaning: comment out the dead code! 
-// MEANING: when not wasm comment out GLSL100 and some ifs in main
-// there are opt levels that might remove it.
 #[cfg(not(target_arch = "wasm32"))]
 pub const GLSL_VERSION: i32 = 330;
 #[cfg(target_arch = "wasm32")]

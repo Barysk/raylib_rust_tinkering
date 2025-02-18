@@ -40,15 +40,13 @@ fn main() {
         )
         .unwrap()
     };
-    
+
     // Future tweaks
     //let mut audio = RaylibAudio::init_audio_device();
     //let sound: Sound = RaylibAudio::new_music_from_memory(&'aud self, filetype, bytes);
 
     let img = Image::load_image_from_mem(".png", TEXTURE_TEXEL_CHECKER).unwrap();
-    let texture = rl
-        .load_texture_from_image(&thread, &img)
-        .unwrap();
+    let texture = rl.load_texture_from_image(&thread, &img).unwrap();
     drop(img);
 
     // Assign texture to default model material
@@ -61,7 +59,7 @@ fn main() {
     model_c.materials_mut()[0].maps_mut()
         [raylib::consts::MaterialMapIndex::MATERIAL_MAP_ALBEDO as usize]
         .texture = *texture.as_ref();
-    
+
     // Prepearing right shaders
     let vertex_shader: &str;
     let fractal_shader: &str;
@@ -70,17 +68,12 @@ fn main() {
         vertex_shader = VERTEX_SHADER_GLSL330;
         fractal_shader = FRACTAL_SHADER_GLSL330;
     } else {
-        vertex_shader = VERTEX_SHADER_GLSL330;
-        fractal_shader = FRACTAL_SHADER_GLSL330;
+        vertex_shader = VERTEX_SHADER_GLSL100;
+        fractal_shader = FRACTAL_SHADER_GLSL100;
     }
 
     // Load shader and set up some uniforms
-    let mut shader = rl
-        .load_shader_from_memory(
-            &thread,
-            Some(vertex_shader),
-            Some(fractal_shader),
-        );
+    let mut shader = rl.load_shader_from_memory(&thread, Some(vertex_shader), Some(fractal_shader));
     shader.locs_mut()[raylib::consts::ShaderLocationIndex::SHADER_LOC_MATRIX_MODEL as usize] =
         shader.get_shader_location("matModel");
     shader.locs_mut()[raylib::consts::ShaderLocationIndex::SHADER_LOC_VECTOR_VIEW as usize] =
@@ -126,7 +119,6 @@ fn main() {
     let mut frame_count = 0;
     let mut is_colliding: bool;
 
-
     let img = Image::load_image_from_mem(".png", TEXTURE_TREE_LEFT).unwrap();
     let mut ball = Ball::new(&mut rl, &thread, &img);
     drop(img);
@@ -139,15 +131,11 @@ fn main() {
     };
 
     let img = Image::load_image_from_mem(".png", TEXTURE_GROUND).unwrap();
-    let texture_ground = rl
-        .load_texture_from_image(&thread, &img)
-        .unwrap();
+    let texture_ground = rl.load_texture_from_image(&thread, &img).unwrap();
     drop(img);
 
     let img = Image::load_image_from_mem(".png", TEXTURE_TREE_RIGHT).unwrap();
-    let texture_tree = rl
-        .load_texture_from_image(&thread, &img)
-        .unwrap();
+    let texture_tree = rl.load_texture_from_image(&thread, &img).unwrap();
     drop(img);
 
     // Comment regarding this is right on the start of gameloop
