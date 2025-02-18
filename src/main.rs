@@ -10,11 +10,6 @@ use light::*;
 use structs::*;
 use text::*;
 
-struct MonitorResolution{
-    width: i32,
-    height: i32
-}
-
 fn main() {
     let (mut rl, thread) = raylib::init()
         .size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32)
@@ -45,9 +40,12 @@ fn main() {
         )
         .unwrap()
     };
+    
+    let img = Image::load_image_from_mem(".png", TEXTURE_TEXEL_CHECKER).unwrap();
     let texture = rl
-        .load_texture(&thread, "assets/texel_checker.png")
+        .load_texture_from_image(&thread, &img)
         .unwrap();
+    drop(img);
 
     // Assign texture to default model material
     model_a.materials_mut()[0].maps_mut()
@@ -104,14 +102,19 @@ fn main() {
 
     rl.set_target_fps(30); // Set our game to run at 60 frames-per-second
     rl.set_window_min_size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
-    
-    let mut render_target: RenderTexture2D = rl.load_render_texture(&thread, SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32).unwrap();
+
+    let mut render_target: RenderTexture2D = rl
+        .load_render_texture(&thread, SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32)
+        .unwrap();
 
     let mut value: i32 = rl.get_random_value(-100i32..100i32); // not right documentation
     let mut frame_count = 0;
     let mut is_colliding: bool;
 
-    let mut ball = Ball::new(&mut rl, &thread, "assets/tree_left.png");
+
+    let img = Image::load_image_from_mem(".png", TEXTURE_TREE_LEFT).unwrap();
+    let mut ball = Ball::new(&mut rl, &thread, &img);
+    drop(img);
 
     let mut bouncing_ball = BouncingBall {
         position: Vector2::new(SCREEN_WIDTH / 2f32, SCREEN_HEIGHT / 2f32),
@@ -120,62 +123,71 @@ fn main() {
         color: Color::BLUE,
     };
 
-    let texture_ground = rl.load_texture(&thread, "assets/ground.png").unwrap();
-    let texture_tree = rl.load_texture(&thread, "assets/tree_right.png").unwrap();
-    
-    // needed to manage fullscreen properly
-    let mut is_needs_fs_toggle: bool = false;
-    let mut is_needs_resize: bool = false;
+    let img = Image::load_image_from_mem(".png", TEXTURE_GROUND).unwrap();
+    let texture_ground = rl
+        .load_texture_from_image(&thread, &img)
+        .unwrap();
+    drop(img);
 
-    let monitor_res: MonitorResolution;
-    {
-        let monitor = get_current_monitor();
-        monitor_res = MonitorResolution{
-            width: get_monitor_width(monitor),
-            height: get_monitor_height(monitor)
-        }
-    }
-    println!("Monitor info: {}x{}", monitor_res.width, monitor_res.height);
-    
+    let img = Image::load_image_from_mem(".png", TEXTURE_TREE_RIGHT).unwrap();
+    let texture_tree = rl
+        .load_texture_from_image(&thread, &img)
+        .unwrap();
+    drop(img);
+
+    // Comment regarding this is right on the start of gameloop
+    // // needed to manage fullscreen properly
+    // let mut is_needs_fs_toggle: bool = false;
+    // let mut is_needs_resize: bool = false;
+
+    // let monitor_res: MonitorResolution;
+    // {
+    //     let monitor = get_current_monitor();
+    //     monitor_res = MonitorResolution{
+    //         width: get_monitor_width(monitor),
+    //         height: get_monitor_height(monitor)
+    //     }
+    // }
+    // //println!("Monitor info: {}x{}", monitor_res.width, monitor_res.height);
+
     while !rl.window_should_close() {
         let delta_time = rl.get_frame_time();
-        
-        { // Managing Fullscreen 3 frames needed [has black line, becouse of taskbar]
-            // 3. toggle
-            if is_needs_fs_toggle {
-                println!("current window size: {}x{}", rl.get_screen_width(), rl.get_screen_height());
-                rl.toggle_fullscreen();
-                is_needs_fs_toggle = false;
-            }
-            
-            // 2. resize
-            if is_needs_resize {
-                if !rl.is_window_fullscreen(){
-                    rl.set_window_size(monitor_res.width, monitor_res.height);
-                } else {
-                    rl.set_window_size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
-                }
-                is_needs_resize = false;
-                is_needs_fs_toggle = true;
-            }
 
-            // 1. set flags
-            if rl.is_key_pressed(KeyboardKey::KEY_F11){
-                if !rl.is_window_fullscreen(){
-                    rl.set_window_state(WindowState::set_window_undecorated(rl.get_window_state(), true));
-                    rl.set_window_state(WindowState::set_window_topmost(rl.get_window_state(), true));
-                } else {
-                    rl.clear_window_state(WindowState::set_window_undecorated(rl.get_window_state(), true));
-                    rl.clear_window_state(WindowState::set_window_topmost(rl.get_window_state(), true));
-                }
-                is_needs_resize = true;
-            }
-        }
+        /* Use of simple toggle_borderless_window gives good result on windows and linux, so no reason to use toggle_fullscreen*/
+        // { // Managing Fullscreen 3 frames needed [has black line, becouse of taskbar]
+        //     // 3. toggle
+        //     if is_needs_fs_toggle {
+        //         //println!("current window size: {}x{}", rl.get_screen_width(), rl.get_screen_height());
+        //         rl.toggle_fullscreen();
+        //         is_needs_fs_toggle = false;
+        //     }
+        //     // 2. resize
+        //     if is_needs_resize {
+        //         if !rl.is_window_fullscreen(){
+        //             rl.set_window_size(monitor_res.width, monitor_res.height);
+        //         } else {
+        //             rl.set_window_size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
+        //         }
+        //         is_needs_resize = false;
+        //         is_needs_fs_toggle = true;
+        //     }
+        //     // 1. set flags
+        //     if rl.is_key_pressed(KeyboardKey::KEY_F11){
+        //         if !rl.is_window_fullscreen(){
+        //             rl.set_window_state(WindowState::set_window_undecorated(rl.get_window_state(), true));
+        //             rl.set_window_state(WindowState::set_window_topmost(rl.get_window_state(), true));
+        //         } else {
+        //             rl.clear_window_state(WindowState::set_window_undecorated(rl.get_window_state(), true));
+        //             rl.clear_window_state(WindowState::set_window_topmost(rl.get_window_state(), true));
+        //         }
+        //         is_needs_resize = true;
+        //     }
+        // }
 
         // Maximize
-        if (rl.is_key_down(KeyboardKey::KEY_RIGHT_ALT)
-        || rl.is_key_down(KeyboardKey::KEY_LEFT_ALT))
-        && rl.is_key_pressed(KeyboardKey::KEY_ENTER) {
+        if (rl.is_key_down(KeyboardKey::KEY_RIGHT_ALT) || rl.is_key_down(KeyboardKey::KEY_LEFT_ALT))
+            && rl.is_key_pressed(KeyboardKey::KEY_ENTER)
+        {
             rl.toggle_borderless_windowed();
         }
 
@@ -372,16 +384,17 @@ fn main() {
                 Color::RAYWHITE,
             );
         }
-        { // Screen scaling
+        {
+            // Screen scaling
             let mut scaling: i32 = 1i32;
-            
+
             let scale_y = d.get_screen_height() / SCREEN_HEIGHT as i32;
             let scale_x = d.get_screen_width() / SCREEN_WIDTH as i32;
 
-
-            if scale_x != scaling && scale_y != scaling{
-                if render_target.texture.width*scaling <= d.get_screen_width()
-                && render_target.texture.height*scaling <= d.get_screen_height(){
+            if scale_x != scaling && scale_y != scaling {
+                if render_target.texture.width * scaling <= d.get_screen_width()
+                    && render_target.texture.height * scaling <= d.get_screen_height()
+                {
                     if scale_x >= scale_y {
                         scaling = scale_y as i32;
                     } else {
@@ -389,24 +402,34 @@ fn main() {
                     }
                 }
             }
-            
+
             let screen_center: Vector2 = Vector2::new(
                 d.get_screen_width() as f32 / 2f32,
-                d.get_screen_height() as f32 / 2f32
+                d.get_screen_height() as f32 / 2f32,
             );
 
             let render_target_position: Vector2 = Vector2::new(
                 screen_center.x - (render_target.texture.width * scaling) as f32 / 2f32,
-                screen_center.y - (render_target.texture.height * scaling) as f32 / 2f32
+                screen_center.y - (render_target.texture.height * scaling) as f32 / 2f32,
             );
 
             d.draw_texture_pro(
                 render_target.texture(),
-                rrect(0, 0, render_target.texture.width, -render_target.texture.height),
-                rrect(0, 0, render_target.texture.width * scaling, render_target.texture.height * scaling),
+                rrect(
+                    0,
+                    0,
+                    render_target.texture.width,
+                    -render_target.texture.height,
+                ),
+                rrect(
+                    0,
+                    0,
+                    render_target.texture.width * scaling,
+                    render_target.texture.height * scaling,
+                ),
                 rvec2(-render_target_position.x, -render_target_position.y),
                 0f32, // no rotation
-                Color::WHITE
+                Color::WHITE,
             );
         }
     }
