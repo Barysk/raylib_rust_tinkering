@@ -70,7 +70,7 @@ fn main() {
 
     // Ambient light level
     let ambient_loc = shader.get_shader_location("ambient");
-    shader.set_shader_value(ambient_loc, Vector4::new(0.2, 0.2, 0.2, 1.0));
+    shader.set_shader_value(ambient_loc, Vector4::new(0.2, 0.2, 0.2, 0.2));
 
     let mut fog_density = 0.15;
     let fog_density_loc = shader.get_shader_location("fogDensity");
@@ -103,6 +103,9 @@ fn main() {
     // ); //
 
     rl.set_target_fps(60); // Set our game to run at 60 frames-per-second
+    rl.set_window_min_size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
+    
+    let mut render_target: RenderTexture2D = rl.load_render_texture(&thread, SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32).unwrap();
 
     let mut value: i32 = rl.get_random_value(-100i32..100i32); // not right documentation
     let mut frame_count = 0;
@@ -234,88 +237,118 @@ fn main() {
         /* --- DRAW --- */
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::BLACK);
-
         {
-            let mut d = d.begin_mode3D(cam_background_3d);
+            let mut d = d.begin_texture_mode(&thread, &mut render_target);
+            d.clear_background(Color::GRAY);
+            {
+                let mut d = d.begin_mode3D(cam_background_3d);
 
-            // Draw the three models
-            d.draw_model(&model_a, Vector3::zero(), 1.0, Color::WHITE);
-            d.draw_model(&model_b, rvec3(-2.6, 0, 0), 1.0, Color::WHITE);
-            d.draw_model(&model_c, rvec3(2.6, 0, 0), 1.0, Color::WHITE);
+                // Draw the three models
+                d.draw_model(&model_a, Vector3::zero(), 1.0, Color::WHITE);
+                d.draw_model(&model_b, rvec3(-2.6, 0, 0), 1.0, Color::WHITE);
+                d.draw_model(&model_c, rvec3(2.6, 0, 0), 1.0, Color::WHITE);
 
-            for i in (-20..20).step_by(2) {
-                d.draw_model(&model_a, rvec3(i, 0, 2), 1.0, Color::WHITE);
+                for i in (-20..20).step_by(2) {
+                    d.draw_model(&model_a, rvec3(i, 0, 2), 1.0, Color::WHITE);
+                }
             }
-        }
 
-        // ENTER 3D MODE
-        {
-            let mut d3d = d.begin_mode3D(&cam_background_3d);
-            d3d.draw_grid(128i32, 4f32);
-        }
-        // draw texture
-        d.draw_texture_rec(
-            &texture_ground,
-            Rectangle::new(0f32, 0f32, SCREEN_WIDTH / 4f32, SCREEN_HEIGHT / 4f32),
-            Vector2::new(0f32, 0f32),
-            Color::WHITE,
-        );
-        d.draw_texture_v(&texture_tree, Vector2::new(0f32, 0f32), Color::WHITE);
-
-        // draw bouncing ball
-        {
-            d.draw_circle_v(
-                bouncing_ball.position,
-                bouncing_ball.radius,
-                bouncing_ball.color,
+            // ENTER 3D MODE
+            {
+                let mut d3d = d.begin_mode3D(&cam_background_3d);
+                d3d.draw_grid(128i32, 4f32);
+            }
+            // draw texture
+            d.draw_texture_rec(
+                &texture_ground,
+                Rectangle::new(0f32, 0f32, SCREEN_WIDTH / 4f32, SCREEN_HEIGHT / 4f32),
+                Vector2::new(0f32, 0f32),
+                Color::WHITE,
             );
-            d.draw_circle_v(
-                bouncing_ball.position,
-                bouncing_ball.radius - 2f32,
+            d.draw_texture_v(&texture_tree, Vector2::new(0f32, 0f32), Color::WHITE);
+
+            // draw bouncing ball
+            {
+                d.draw_circle_v(
+                    bouncing_ball.position,
+                    bouncing_ball.radius,
+                    bouncing_ball.color,
+                );
+                d.draw_circle_v(
+                    bouncing_ball.position,
+                    bouncing_ball.radius - 2f32,
+                    Color::WHITE,
+                );
+            }
+
+            // centered text drawing
+            {
+                draw_text_center(
+                    &mut d,
+                    "every 60 frames new value genrated",
+                    SCREEN_HEIGHT as i32 / 2i32 - 40i32,
+                    24i32,
+                    Color::DARKGRAY,
+                );
+                draw_text_center(
+                    &mut d,
+                    &value.to_string(),
+                    SCREEN_HEIGHT as i32 / 2i32 - 20i32,
+                    24i32,
+                    Color::DARKGRAY,
+                );
+            }
+
+            // Handle ball drawing
+            {
+                ball.draw(&mut d);
+                d.draw_circle_v(ball.position, ball.radius + 2f32, ball.color);
+                d.draw_circle_v(ball.position, ball.radius, Color::WHITE);
+            }
+
+            d.draw_text(VERSION_NAME, 12i32, 12i32, 16i32, Color::RAYWHITE);
+            // d.draw_fps(12i32, 32i32);
+            d.draw_text(
+                &d.get_fps().to_string(),
+                12i32,
+                24i32,
+                16i32,
+                Color::RAYWHITE,
+            );
+            d.draw_text(
+                &fog_density.to_string(),
+                12i32,
+                36i32,
+                12i32,
+                Color::RAYWHITE,
+            );
+        }
+        {
+            // find screen center
+            // place target center at screen center
+            // find 
+            let screen_center: Vector2 = Vector2::new(
+                d.get_screen_width() as f32 / 2f32,
+                d.get_screen_height() as f32 / 2f32
+            );
+
+            let render_target_position: Vector2 = Vector2::new(
+                screen_center.x - render_target.texture.width as f32 / 2f32,
+                screen_center.y - render_target.texture.height as f32 / 2f32
+            );
+
+            d.draw_texture_rec(
+                render_target.texture(),
+                rrect(
+                    0,
+                    0,
+                    render_target.texture.width,
+                    -render_target.texture.height
+                ),
+                rvec2(render_target_position.x, render_target_position.y),
                 Color::WHITE,
             );
         }
 
-        // centered text drawing
-        {
-            draw_text_center(
-                &mut d,
-                "every 60 frames new value genrated",
-                SCREEN_HEIGHT as i32 / 2i32 - 40i32,
-                24i32,
-                Color::DARKGRAY,
-            );
-            draw_text_center(
-                &mut d,
-                &value.to_string(),
-                SCREEN_HEIGHT as i32 / 2i32 - 20i32,
-                24i32,
-                Color::DARKGRAY,
-            );
-        }
-
-        // Handle ball drawing
-        {
-            ball.draw(&mut d);
-            d.draw_circle_v(ball.position, ball.radius + 2f32, ball.color);
-            d.draw_circle_v(ball.position, ball.radius, Color::WHITE);
-        }
-
-        d.draw_text(VERSION_NAME, 12i32, 12i32, 16i32, Color::RAYWHITE);
-        // d.draw_fps(12i32, 32i32);
-        d.draw_text(
-            &d.get_fps().to_string(),
-            12i32,
-            24i32,
-            16i32,
-            Color::RAYWHITE,
-        );
-        d.draw_text(
-            &fog_density.to_string(),
-            12i32,
-            36i32,
-            12i32,
-            Color::RAYWHITE,
-        );
     }
 }

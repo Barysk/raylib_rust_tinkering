@@ -25,7 +25,7 @@ impl Ball {
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle) {
+    pub fn draw(&self, d: &mut RaylibTextureMode<RaylibDrawHandle>) {
         d.draw_texture_v(
             &self.sprite,
             self.position

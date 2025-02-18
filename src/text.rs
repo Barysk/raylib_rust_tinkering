@@ -2,7 +2,7 @@ use crate::constants::SCREEN_WIDTH;
 use raylib::prelude::*;
 
 pub fn draw_text_center(
-    d: &mut RaylibDrawHandle,
+    d: &mut RaylibTextureMode<RaylibDrawHandle>,
     text: &str,
     y: i32,
     font_size: i32,
