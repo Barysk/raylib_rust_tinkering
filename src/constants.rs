@@ -3,6 +3,11 @@ pub const SCREEN_WIDTH: f32 = 640f32 / 2f32;
 pub const SCREEN_HEIGHT: f32 = 480f32 / 2f32;
 pub const VERSION_NAME: &str = "Embeded shaders/assets";
 
+
+/* Audio*/
+pub const AUDIO_MUSIC: &[u8; 2764117] = include_bytes!("../assets/Noster_MF_SC1.mp3");
+pub const AUDIO_SOUND: &[u8; 6751] = include_bytes!("../assets/enemyExplosion.mp3");
+
 /* Textures */
 pub const TEXTURE_TEXEL_CHECKER: &[u8; 57153] = include_bytes!("../assets/texel_checker.png");
 pub const TEXTURE_GROUND: &[u8; 119400] = include_bytes!("../assets/ground.png");

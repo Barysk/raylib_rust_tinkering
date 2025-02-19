@@ -1,4 +1,5 @@
 use raylib::prelude::*;
+//use raylib::core::audio::{ Sound, RaylibAudio };
 
 mod constants;
 mod light;
@@ -40,10 +41,6 @@ fn main() {
         )
         .unwrap()
     };
-
-    // Future tweaks
-    //let mut audio = RaylibAudio::init_audio_device();
-    //let sound: Sound = RaylibAudio::new_music_from_memory(&'aud self, filetype, bytes);
 
     let img = Image::load_image_from_mem(".png", TEXTURE_TEXEL_CHECKER).unwrap();
     let texture = rl.load_texture_from_image(&thread, &img).unwrap();
@@ -108,7 +105,7 @@ fn main() {
         45f32,
     );
 
-    rl.set_target_fps(30); // Set our game to run at 60 frames-per-second
+    rl.set_target_fps(60u32); // Set our game to run at 60 frames-per-second
     rl.set_window_min_size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
 
     let mut render_target: RenderTexture2D = rl
@@ -153,8 +150,30 @@ fn main() {
     // }
     // //println!("Monitor info: {}x{}", monitor_res.width, monitor_res.height);
 
+    /* Audio */
+    // Audio init
+    let audio = RaylibAudio::init_audio_device().unwrap();
+    // load music
+    let music_data: Vec<u8> = AUDIO_MUSIC.to_vec();
+    let mut music: Music = audio.new_music_from_memory(".mp3", &music_data).unwrap();
+    //let mut music: Music = audio.new_music("assets/Noster_MF_SC1.mp3").unwrap();
+    // load sound
+    let sound_wave: Wave = audio.new_wave_from_memory(".mp3", AUDIO_SOUND).unwrap();
+    let sound: Sound = audio.new_sound_from_wave(&sound_wave).unwrap();
+    drop(sound_wave);
+    
+    audio.set_master_volume(1.0f32);
+    music.play_stream();
+
     while !rl.window_should_close() {
         let delta_time = rl.get_frame_time();
+
+        music.update_stream();
+        // play sound
+        if rl.is_key_pressed(KeyboardKey::KEY_Z) && !sound.is_playing(){
+            sound.play();
+        }
+
 
         /* Use of simple toggle_borderless_window gives good result on windows and linux, so no reason to use toggle_fullscreen*/
         // { // Managing Fullscreen 3 frames needed [has black line, becouse of taskbar]
