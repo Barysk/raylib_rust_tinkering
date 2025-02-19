@@ -163,13 +163,13 @@ fn main() {
  
     // /// Sets default audio buffer size for new audio streams.
     // #[inline]
-    // pub fn set_audio_stream_buffer_size_default(size: i32) {
+    // pub fn set_audio_stream_buffer_size_default(&self, size: i32) {
     //     unsafe {
     //         ffi::SetAudioStreamBufferSizeDefault(size);
     //     }
     // }
     
-    RaylibAudio::set_audio_stream_buffer_size_default(4096);
+    audio.set_audio_stream_buffer_size_default(4096);
 
     // load music
     let music_data: Vec<u8> = AUDIO_MUSIC.to_vec();
