@@ -153,6 +153,11 @@ fn main() {
     /* Audio */
     // Audio init
     let audio = RaylibAudio::init_audio_device().unwrap();
+
+    // Can't find A safe binding, and it is really needed
+    // It fixes the issue with cracking sound
+    unsafe { ffi::SetAudioStreamBufferSizeDefault(4096) };
+
     // load music
     let music_data: Vec<u8> = AUDIO_MUSIC.to_vec();
     let mut music: Music = audio.new_music_from_memory(".mp3", &music_data).unwrap();
