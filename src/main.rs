@@ -156,7 +156,20 @@ fn main() {
 
     // Can't find A safe binding, and it is really needed
     // It fixes the issue with cracking sound
-    unsafe { ffi::SetAudioStreamBufferSizeDefault(4096) };
+    
+    // unsafe { ffi::SetAudioStreamBufferSizeDefault(4096) };
+    
+    // Added a binding to raylib-rs [audio.rs] for this:
+ 
+    // /// Sets default audio buffer size for new audio streams.
+    // #[inline]
+    // pub fn set_audio_stream_buffer_size_default(size: i32) {
+    //     unsafe {
+    //         ffi::SetAudioStreamBufferSizeDefault(size);
+    //     }
+    // }
+    
+    RaylibAudio::set_audio_stream_buffer_size_default(4096);
 
     // load music
     let music_data: Vec<u8> = AUDIO_MUSIC.to_vec();
